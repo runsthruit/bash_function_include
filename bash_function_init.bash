@@ -6,112 +6,142 @@ function bash_function_init ()
 #
 {
 
-	declare FNC="BASH_FUNCTION_INIT"
-	declare RGX=".*[^[:blank:]]([[:blank:]]*### ${FNC} ###.*### ${FNC} ###).*"
+	declare __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}=
+	__bash_function_init_opts=( source )
+	__bash_function_init_locv_strings=()
+	__bash_function_init_locv_arrays=()
+	__bash_function_init_glbv_strings=()
+	__bash_function_init_glbv_arrays=()
+
+	declare INIT_SOURCE=
+	declare RGX=".*[^[:blank:]]([[:blank:]]*### BASH_FUNCTION_INIT SOURCE ###.*### BASH_FUNCTION_INIT SOURCE ###).*"
 	[[ "$( < "${BASH_SOURCE[0]}" )" =~ ${RGX} ]] \
-	&& echo "${BASH_REMATCH[1]}" \
-	|| echo "echo \"${FNC}: FAIL\" 1>&2; return 1"
+	&& INIT_SOURCE="${BASH_REMATCH[1]}" \
+	|| INIT_SOURCE="echo \"${FUNCNAME[0]}: FAIL\" 1>&2; return 1"
+
+	eval "${INIT_SOURCE}"
+
+	[ "${OPT_source:-0}" -eq 0 ] \
+	|| {
+		echo "${INIT_SOURCE}"
+		return 0
+	}
+
+	[ "${*:-}" != "" ] \
+	|| {
+		sed "s/^/  /" <<-'EOF'
+
+		To initialize your function, insert the following line at the beginning of your function..
+
+		: BASH_FUNCTION_INIT; eval "$( bash_function_init --source )"
+
+		EOF
+		return 1
+	}
+
+	declare -p ${LOCV[*]} ${GLBV[*]} 1>&2
 
 	return 0
 
-	### BASH_FUNCTION_INIT ###
+	### BASH_FUNCTION_INIT SOURCE ###
 
 	#
-	for __bash_function_ent in __bash_function_{opts,{locv,glbv}_{strings,arrays}}
+	for __bash_function_init_ent in __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
 	do
-		eval "declare -p ${__bash_function_ent}" &>/dev/null \
+		eval "declare -p ${__bash_function_init_ent}" &>/dev/null \
 		|| {
 			printf "\n: Set the following in your function, before the call to BASH_FUNCTION_INIT..\n\n"
-			printf "\tdeclare %s=()\n" __bash_function_{opts,_{locv,glbv}_{strings,arrays}}
+			printf "\tdeclare %s=\n" "__bash_function_init_{opts,{locv,glbv}_{strings,arrays}}"
+			printf "\t%s=()\n" __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
 			printf "\n"
 			return 1
 		} 1>&2
 	done
 
 	#
-	__bash_function_fnc="${FUNCNAME[0]:-}"
-	__bash_function_tag="$( echo "${__bash_function_fnc}" | tr "[:lower:]" "[:upper:]" )"
+	__bash_function_init_fnc="${FUNCNAME[0]:-}"
+	__bash_function_init_tag="$( echo "${__bash_function_init_fnc}" | tr "[:lower:]" "[:upper:]" )"
 
 	#
-	__bash_function_opts=(
+	__bash_function_init_opts=(
 		help
 		init
 		exec
-		${__bash_function_opts:+"${__bash_function_opts[@]}"}
+		${__bash_function_init_opts:+"${__bash_function_init_opts[@]}"}
 	)
-	__bash_function_locv_strings=(
+	__bash_function_init_locv_strings=(
 		FNC TAG TMP ENT VAR VAL I J K
 		TAB NLN CRT
 		FLG_sourced
-		${__bash_function_locv_strings:+"${__bash_function_locv_strings[@]}"}
+		${__bash_function_init_locv_strings:+"${__bash_function_init_locv_strings[@]}"}
 	)
-	__bash_function_locv_arrays=(
+	__bash_function_init_locv_arrays=(
 		LOCV
 		GLBV
 		ARGS
-		${__bash_function_locv_arrays:+"${__bash_function_locv_arrays[@]}"}
+		${__bash_function_init_locv_arrays:+"${__bash_function_init_locv_arrays[@]}"}
 	)
-	__bash_function_glbv_strings=(
-		DEBUG_${__bash_function_tag}
-		${__bash_function_glbv_strings:+"${__bash_function_glbv_strings[@]}"}
+	__bash_function_init_glbv_strings=(
+		DEBUG_${__bash_function_init_tag}
+		${__bash_function_init_glbv_strings:+"${__bash_function_init_glbv_strings[@]}"}
 	)
-	__bash_function_glbv_arrays=(
-		${__bash_function_glbv_arrays:+"${__bash_function_glbv_arrays[@]}"}
+	__bash_function_init_glbv_arrays=(
+		${__bash_function_init_glbv_arrays:+"${__bash_function_init_glbv_arrays[@]}"}
 	)
 
 	#
-	for __bash_function_var in ${__bash_function_locv_strings[*]:-}
+	for __bash_function_init_var in ${__bash_function_init_locv_strings[*]:-}
 	do
-		eval "declare ${__bash_function_var}="
+		eval "declare ${__bash_function_init_var}="
 	done
-	for __bash_function_var in ${__bash_function_locv_arrays[*]:-}
+	for __bash_function_init_var in ${__bash_function_init_locv_arrays[*]:-}
 	do
-		eval "declare ${__bash_function_var}=()"
+		eval "declare ${__bash_function_init_var}=()"
 	done
-	for __bash_function_var in ${__bash_function_glbv_strings[*]:-} ${__bash_function_glbv_arrays[*]:-}
+	for __bash_function_init_var in ${__bash_function_init_glbv_strings[*]:-} ${__bash_function_init_glbv_arrays[*]:-}
 	do
-		eval "export ${__bash_function_var}"
+		eval "export ${__bash_function_init_var}"
 	done
-	for __bash_function_var in ${__bash_function_glbv_strings[*]:-}
+	for __bash_function_init_var in ${__bash_function_init_glbv_strings[*]:-}
 	do
-		eval "${__bash_function_var}=\${${__bash_function_var}:-}"
+		eval "${__bash_function_init_var}=\${${__bash_function_init_var}:-}"
 	done
-	for __bash_function_var in ${__bash_function_glbv_arrays[*]:-}
+	for __bash_function_init_var in ${__bash_function_init_glbv_arrays[*]:-}
 	do
-		eval "${__bash_function_var}=( \${${__bash_function_var}[@]:+\"\${${__bash_function_var}[@]}\"} )"
+		eval "${__bash_function_init_var}=( \${${__bash_function_init_var}[@]:+\"\${${__bash_function_init_var}[@]}\"} )"
 	done
 
 	#
 	eval "printf -v TAB \"\t\""
 	eval "printf -v NLN \"\n\""
 	eval "printf -v CRT \"\r\""
-	eval "FNC=\"\${__bash_function_fnc}\""
-	eval "TAG=\"\${__bash_function_tag}-\${RANDOM}-\${SECONDS}\""
+	eval "FNC=\"\${__bash_function_init_fnc}\""
+	eval "TAG=\"\${__bash_function_init_tag}-\${RANDOM}-\${SECONDS}\""
 
 	#
-	for __bash_function_ent in ${__bash_function_opts[*]%%=*}
+	for __bash_function_init_ent in ${__bash_function_init_opts[*]%%=*}
 	do
-		eval "declare OPT_${__bash_function_ent}=0"
+		eval "declare OPT_${__bash_function_init_ent}=0"
 	done
-	for (( __bash_function_ent=1; __bash_function_ent<=${#@}; __bash_function_ent++ ))
+	for (( __bash_function_init_ent=1; __bash_function_init_ent<=${#@}; __bash_function_init_ent++ ))
 	do
-		eval "__bash_function_val=\"\${${__bash_function_ent}}\""
-		case "${__bash_function_val}" in
+		eval "__bash_function_init_val=\"\${${__bash_function_init_ent}}\""
+		case "${__bash_function_init_val}" in
 			( -h* ) {
 				OPT_help=1
 				break
 			};;
 			( --* ) {
-				eval "OPT_${__bash_function_val#--}=1"
+				eval "OPT_${__bash_function_init_val#--}=1"
 			};;
-			( * ) ARGS[${#ARGS[@]}]="${__bash_function_val}";;
+			( * ) ARGS[${#ARGS[@]}]="${__bash_function_init_val}";;
 		esac
 	done
 	[ "${BASH_SOURCE[0]}" == "${0}" -o "${#BASH_SOURCE[@]}" -eq 0 ] && FLG_sourced=0 || FLG_sourced=1
 
 	#
-	LOCV=( ${__bash_function_opts[*]/#/OPT_} ${__bash_function_locv_strings[*]:-} ${__bash_function_locv_arrays[*]:-} )
-	GLBV=( ${__bash_function_glbv_strings[*]:-} ${__bash_function_glbv_arrays[*]:-} )
+	LOCV=( ${__bash_function_init_opts[*]/#/OPT_} ${__bash_function_init_locv_strings[*]:-} ${__bash_function_init_locv_arrays[*]:-} )
+	GLBV=( ${__bash_function_init_glbv_strings[*]:-} ${__bash_function_init_glbv_arrays[*]:-} )
 
 	#
 	[ "${FLG_sourced:-0}" -eq 1 -o "${OPT_exec:-0}" -eq 1 ] \
@@ -135,32 +165,10 @@ function bash_function_init ()
 	|| return 0
 
 	#
-	unset ${!__bash_function*}
+	unset ${!__bash_function_init*}
 
-	### BASH_FUNCTION_INIT ###
+	### BASH_FUNCTION_INIT SOURCE ###
 
 }
 
-function bash_function_make ()
-#
-#
-#
-{
-	:
-}
-
-function bash_function_help ()
-#
-#
-#
-{
-	sed "s/^/  /" <<-'EOF'
-	
-	To initialize your function, insert the following line at the beginning of your function..
-	
-	: BASH_FUNCTION_INIT; eval "$( bash_function_init )"
-
-	EOF
-}
-
-bash_function_help ${@:+"${@}"}
+bash_function_init --init ${@:+"${@}"}
