@@ -58,6 +58,50 @@ function bash_function_init ()
 		return 1
 	}
 
+	[ "${OPT_compile:-0}" -eq 0 ] \
+	|| {
+		TMP=
+		for (( I=$((${#ARGS[@]}-1)); I>=0; I-- ))
+		do
+			J="$( < "${ARGS[${I}]}" )"
+			[ "${I}" -eq "$((${#ARGS[@]}-1))" ] \
+			|| {
+				RGX="^(#![^${CRT}${NLN}]+[${CRT}${NLN}]+)*(.*)"
+				[[ "${J}" =~ ${RGX} ]] \
+				&& J="${BASH_REMATCH[2]}" \
+				|| :
+				RGX="(.*)(: BASH_FUNCTION_INIT[[:blank:]]*;[^${CRT}${NLN}]*[${CRT}${NLN}]*)(.*)"
+				while [[ "${J}" =~ ${RGX} ]]
+				do
+					J="${BASH_REMATCH[1]}${BASH_REMATCH[3]}"
+				done
+			}
+			RGX="(.*[${CRT}${NLN}]+)[[:blank:]]*### BASH_FUNCTION_INIT SOURCE ###.*### BASH_FUNCTION_INIT SOURCE ###[^${CRT}${NLN}]*(.*)"
+			[[ "${J}" =~ ${RGX} ]] \
+			&& J="${BASH_REMATCH[1]}${INIT_SOURCE}${BASH_REMATCH[2]}" \
+			|| :
+			RGX="(.*[${CRT}${NLN}]+)[[:blank:]]*: BASH_FUNCTION_INIT SOURCE[[:blank:]]*; .*: BASH_FUNCTION_INIT SOURCE[[:blank:]]*;[^${CRT}${NLN}]*(.*)"
+			[[ "${J}" =~ ${RGX} ]] \
+			&& J="${BASH_REMATCH[1]}${INIT_SOURCE}${BASH_REMATCH[2]}" \
+			|| :
+			RGX="^([[:space:]]*[${CRT}${NLN}]+)*(.*)([${CRT}${NLN}]+[[:space:]]*)$"
+			[[ "${J}" =~ ${RGX} ]] \
+			&& J="${BASH_REMATCH[2]}" \
+			|| :
+			[ "${I}" -eq "$((${#ARGS[@]}-1))" ] \
+			&& TMP="${J}" \
+			|| {
+				RGX="^(.*)(### BASH_FUNCTION_INIT COMPILE ###[[:space:]]*)(.*)"
+				[[ "${TMP}" =~ ${RGX} ]] \
+				&& TMP="${BASH_REMATCH[1]}${BASH_REMATCH[2]}${J}${NLN}${BASH_REMATCH[3]}" \
+				|| :
+			}
+			#declare -p BASH_REMATCH 1>&2
+		done
+		echo "${TMP}"
+		return 0
+	}
+
 	declare -p ${LOCV[*]} ${GLBV[*]} 1>&2
 
 	return 0
@@ -185,6 +229,8 @@ function bash_function_init ()
 
 	#
 	unset ${!__bash_function_init*}
+
+	### BASH_FUNCTION_INIT COMPILE ###
 
 	### BASH_FUNCTION_INIT SOURCE ###
 
