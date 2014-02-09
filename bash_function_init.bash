@@ -7,7 +7,9 @@ function bash_function_init ()
 {
 
 	declare __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}=
-	__bash_function_init_opts=( source )
+	__bash_function_init_opts=(
+		source
+	)
 	__bash_function_init_locv_strings=()
 	__bash_function_init_locv_arrays=()
 	__bash_function_init_glbv_strings=()
@@ -29,13 +31,30 @@ function bash_function_init ()
 
 	[ "${*:-}" != "" ] \
 	|| {
-		sed "s/^/  /" <<-'EOF'
+		sed "s/^[[:blank:]]*//" 1>&2 <<-'EOF'
 
-		To initialize your function, insert the following line at the beginning of your function..
+		To initialize your function,
+		insert the following line at the beginning of your function..
 
-		: BASH_FUNCTION_INIT; eval "$( bash_function_init --source )"
+		: BASH_FUNCTION_INIT SOURCE; {
+		declare -F bash_function_init &>/dev/null \
+		&& eval "$( bash_function_init --source )" \
+		|| { echo : NO_BASH_FUNCTION_INIT 1>&2; return 1; }
+		: BASH_FUNCTION_INIT SOURCE; }
+
+		If you want to be able to run the function as a script,
+		or warn users that it is not to be run as a script,
+		add the following to the end of your function source,
+		*OUTSIDE* of the function.
+
+		: BASH_FUNCTION_INIT; I="${BASH_SOURCE[0]##*/}" && ${I%.*} --init ${@:+"${@}"}
+
+		WARNING::
+		Assumes your function is *EQUAL* to the name of your script,
+		minus an extension. ( ie. ".bash", ".bash_function", etc. )
 
 		EOF
+		[ -t 1 ] || echo return 1
 		return 1
 	}
 
@@ -51,8 +70,8 @@ function bash_function_init ()
 		eval "declare -p ${__bash_function_init_ent}" &>/dev/null \
 		|| {
 			printf "\n: Set the following in your function, before the call to BASH_FUNCTION_INIT..\n\n"
-			printf "\tdeclare %s=\n" "__bash_function_init_{opts,{locv,glbv}_{strings,arrays}}"
-			printf "\t%s=()\n" __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
+			printf "declare %s=\n" "__bash_function_init_{opts,{locv,glbv}_{strings,arrays}}"
+			printf "%s=()\n" __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
 			printf "\n"
 			return 1
 		} 1>&2
@@ -171,4 +190,4 @@ function bash_function_init ()
 
 }
 
-bash_function_init --init ${@:+"${@}"}
+I="${BASH_SOURCE[0]##*/}" && ${I%.*} --init ${@:+"${@}"}
