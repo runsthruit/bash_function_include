@@ -222,7 +222,7 @@ function bash_function_init ()
 	#
 	[ "${FLG_sourced:-0}" -gt 0 -o "${OPT_bash_function_exec:-0}" -gt 0 ] \
 	|| {
-		sed "s/^/  /" <<-EOF
+		cat - 1>&2 <<-EOF
 
 		You are attempting to run this function as a script.
 		It's really meant to be run within your shell session.
@@ -231,11 +231,11 @@ function bash_function_init ()
 
 		If you really wish to run it as a script, then provide this argument..
 
-		--exec
+		  --bash_function_exec
 
 		EOF
 		return 1
-	} 1>&2
+	}
 
 	[ "${OPT_bash_function_init:-0}" -eq 0 -o "${OPT_bash_function_exec:-0}" -gt 0 -o "${#ARGS[@]}" -gt 0 ] \
 	|| return 0
