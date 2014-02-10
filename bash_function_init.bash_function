@@ -29,35 +29,6 @@ function bash_function_init ()
 		return 0
 	}
 
-	[ "${*:-}" != "" ] \
-	|| {
-		sed "s/^[[:blank:]]*//" 1>&2 <<-'EOF'
-
-		To initialize your function,
-		insert the following line at the beginning of your function..
-
-		: BASH_FUNCTION_INIT SOURCE; {
-		declare -F bash_function_init &>/dev/null \
-		&& eval "$( bash_function_init --source )" \
-		|| { echo : NO_BASH_FUNCTION_INIT 1>&2; return 1; }
-		: BASH_FUNCTION_INIT SOURCE; }
-
-		If you want to be able to run the function as a script,
-		or warn users that it is not to be run as a script,
-		add the following to the end of your function source,
-		*OUTSIDE* of the function.
-
-		: BASH_FUNCTION_INIT; I="${BASH_SOURCE[0]##*/}" && ${I%.*} --init ${@:+"${@}"}
-
-		WARNING::
-		Assumes your function is *EQUAL* to the name of your script,
-		minus an extension. ( ie. ".bash", ".bash_function", etc. )
-
-		EOF
-		[ -t 1 ] || echo return 1
-		return 1
-	}
-
 	[ "${OPT_compile:-0}" -eq 0 ] \
 	|| {
 		TMP=
@@ -102,6 +73,30 @@ function bash_function_init ()
 		return 0
 	}
 
+	{
+		cat - 1>&2 <<-EOF
+
+		To initialize your function,
+		insert the following line at the beginning of your function..
+
+		: ${TAG%%/*} SOURCE; eval "\$( ${FNC} --source || echo return 1 )"
+
+		If you want to be able to run the function as a script,
+		or warn users that it is not to be run as a script,
+		add the following to the end of your function source,
+		*OUTSIDE* of the function.
+
+		: ${TAG%%/*} RUN; I="\${BASH_SOURCE[0]##*/}" && \${I%.*} --${FNC} \${@:+"\${@}"}
+
+		WARNING::
+		Assumes your function is *EQUAL* to the name of your script,
+		minus an extension. ( ie. ".bash", ".bash_function", etc. )
+
+		EOF
+		[ -t 1 ] || echo return 1
+		return 1
+	}
+
 	declare -p ${LOCV[*]} ${GLBV[*]} 1>&2
 
 	return 0
@@ -127,13 +122,14 @@ function bash_function_init ()
 
 	#
 	__bash_function_init_opts=(
+		bash_function_init
+		bash_function_exec
 		help
-		init
-		exec
+		debug
 		${__bash_function_init_opts:+"${__bash_function_init_opts[@]}"}
 	)
 	__bash_function_init_locv_strings=(
-		FNC TAG TMP ENT VAR VAL I J K
+		FNC TAG TMP ENT VAR VAL I J K RGX DBG
 		TAB NLN CRT
 		FLG_sourced
 		${__bash_function_init_locv_strings:+"${__bash_function_init_locv_strings[@]}"}
@@ -179,35 +175,52 @@ function bash_function_init ()
 	eval "printf -v NLN \"\n\""
 	eval "printf -v CRT \"\r\""
 	eval "FNC=\"\${__bash_function_init_fnc}\""
-	eval "TAG=\"\${__bash_function_init_tag}-\${RANDOM}-\${SECONDS}\""
+	eval "TAG=\"\${__bash_function_init_tag}/\${RANDOM}/\${SECONDS}\""
+	eval "DBG=\"\${DEBUG_${__bash_function_init_tag%%/*}:-0}\""
 
 	#
 	for __bash_function_init_ent in ${__bash_function_init_opts[*]%%=*}
 	do
 		eval "declare OPT_${__bash_function_init_ent}=0"
 	done
-	for (( __bash_function_init_ent=1; __bash_function_init_ent<=${#@}; __bash_function_init_ent++ ))
+	__bash_function_init_rgx_opts="${__bash_function_init_opts[*]%%=*}"
+	__bash_function_init_rgx_opts="--${__bash_function_init_rgx_opts// /|--}"
+	__bash_function_init_rgx_skip=0
+	for __bash_function_init_ent in ${@:+"${@}"}
 	do
-		eval "__bash_function_init_val=\"\${${__bash_function_init_ent}}\""
-		case "${__bash_function_init_val}" in
-			( -h* ) {
+		[[ "${__bash_function_init_rgx_skip}" == "0" && "${__bash_function_init_ent}" =~ (-h|-help|--|${__bash_function_init_rgx_opts})(=.+)* ]] \
+		&& {
+			__bash_function_init_var="${BASH_REMATCH[1]}"
+			__bash_function_init_val="${BASH_REMATCH[2]}"
+			case "${__bash_function_init_var}" in
+			( -h | -help | --help ) {
 				OPT_help=1
 				break
 			};;
 			( --* ) {
-				eval "OPT_${__bash_function_init_val#--}=1"
+				[ "${__bash_function_init_var}" != "--" ] \
+				|| { __bash_function_init_rgx_skip=1; continue; }
+				[[ "${__bash_function_init_val}" =~ ^= ]] \
+				&& {
+					eval "OPT_${__bash_function_init_var#--}=\"${__bash_function_init_val#=}\""
+				} \
+				|| {
+					eval "OPT_${__bash_function_init_var#--}=\$((\${OPT_${__bash_function_init_var#--}:-0}+1))"
+				}
 			};;
-			( * ) ARGS[${#ARGS[@]}]="${__bash_function_init_val}";;
-		esac
+			esac
+		} \
+		|| ARGS[${#ARGS[@]}]="${__bash_function_init_ent}"
 	done
 	[ "${BASH_SOURCE[0]}" == "${0}" -o "${#BASH_SOURCE[@]}" -eq 0 ] && FLG_sourced=0 || FLG_sourced=1
 
 	#
+	[ "${OPT_debug}" -eq 0 ] || DBG="${OPT_debug}"
 	LOCV=( ${__bash_function_init_opts[*]/#/OPT_} ${__bash_function_init_locv_strings[*]:-} ${__bash_function_init_locv_arrays[*]:-} )
 	GLBV=( ${__bash_function_init_glbv_strings[*]:-} ${__bash_function_init_glbv_arrays[*]:-} )
 
 	#
-	[ "${FLG_sourced:-0}" -eq 1 -o "${OPT_exec:-0}" -eq 1 ] \
+	[ "${FLG_sourced:-0}" -gt 0 -o "${OPT_bash_function_exec:-0}" -gt 0 ] \
 	|| {
 		sed "s/^/  /" <<-EOF
 
@@ -224,7 +237,7 @@ function bash_function_init ()
 		return 1
 	} 1>&2
 
-	[ "${OPT_init:-0}" -eq 0 -o "${OPT_exec:-0}" -eq 1 -o "${#ARGS[@]}" -gt 0 ] \
+	[ "${OPT_bash_function_init:-0}" -eq 0 -o "${OPT_bash_function_exec:-0}" -gt 0 -o "${#ARGS[@]}" -gt 0 ] \
 	|| return 0
 
 	#
@@ -235,5 +248,3 @@ function bash_function_init ()
 	### BASH_FUNCTION_INIT SOURCE ###
 
 }
-
-I="${BASH_SOURCE[0]##*/}" && ${I%.*} --init ${@:+"${@}"}
