@@ -123,7 +123,6 @@ function bash_function_init ()
 	#
 	__bash_function_init_opts=(
 		bash_function_init
-		bash_function_exec
 		help
 		debug
 		${__bash_function_init_opts:+"${__bash_function_init_opts[@]}"}
@@ -141,6 +140,7 @@ function bash_function_init ()
 		${__bash_function_init_locv_arrays:+"${__bash_function_init_locv_arrays[@]}"}
 	)
 	__bash_function_init_glbv_strings=(
+		BASH_FUNCTION_EXEC
 		DEBUG_${__bash_function_init_tag}
 		${__bash_function_init_glbv_strings:+"${__bash_function_init_glbv_strings[@]}"}
 	)
@@ -220,7 +220,7 @@ function bash_function_init ()
 	GLBV=( ${__bash_function_init_glbv_strings[*]:-} ${__bash_function_init_glbv_arrays[*]:-} )
 
 	#
-	[ "${FLG_sourced:-0}" -gt 0 -o "${OPT_bash_function_exec:-0}" -gt 0 ] \
+	[ "${FLG_sourced:-0}" -gt 0 -o "${BASH_FUNCTION_EXEC:-0}" -gt 0 ] \
 	|| {
 		cat - 1>&2 <<-EOF
 
@@ -229,15 +229,16 @@ function bash_function_init ()
 
 		source ${BASH_SOURCE[0]}
 
-		If you really wish to run it as a script, then provide this argument..
+		If you really wish to run it as a script,
+		then export this environment variable..
 
-		  --bash_function_exec
+		  export BASH_FUNCTION_EXEC=1
 
 		EOF
 		return 1
 	}
 
-	[ "${OPT_bash_function_init:-0}" -eq 0 -o "${OPT_bash_function_exec:-0}" -gt 0 -o "${#ARGS[@]}" -gt 0 ] \
+	[ "${OPT_bash_function_init:-0}" -eq 0 -o "${BASH_FUNCTION_EXEC:-0}" -gt 0 -o "${#ARGS[@]}" -gt 0 ] \
 	|| return 0
 
 	#
