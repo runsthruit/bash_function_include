@@ -69,7 +69,8 @@ function bash_function_init ()
 	### BASH_FUNCTION_INIT INIT ###
 
 	#
-	for __bash_function_init_ent in __bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}
+	#for __bash_function_init_ent in __bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}
+	for __bash_function_init_ent in __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
 	do
 		eval "declare -p ${__bash_function_init_ent}" &>/dev/null \
 		|| {
