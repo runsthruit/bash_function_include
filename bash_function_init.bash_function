@@ -6,8 +6,11 @@ function bash_function_init ()
 #
 {
 
-	declare __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}=
-	__bash_function_init_opts=()
+	declare __bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}=
+	__bash_function_init_mods=()
+	__bash_function_init_opts=(
+		init
+	)
 	__bash_function_init_locv_strings=()
 	__bash_function_init_locv_arrays=()
 	__bash_function_init_glbv_strings=(
@@ -16,7 +19,7 @@ function bash_function_init ()
 	__bash_function_init_glbv_arrays=()
 
 	declare INIT_SRC=
-	declare INIT_RGX=".*[^[:blank:]]([[:blank:]]*### BASH_FUNCTION_INIT SOURCE ###.*### BASH_FUNCTION_INIT SOURCE ###).*"
+	declare INIT_RGX=".*[^[:blank:]]([[:blank:]]*### BASH_FUNCTION_INIT INIT ###.*### BASH_FUNCTION_INIT INIT ###).*"
 	[[ "$( < "${BASH_SOURCE[0]}" )" =~ ${INIT_RGX} ]] \
 	&& INIT_SRC="${BASH_REMATCH[1]}" \
 	|| INIT_SRC="echo \"${FUNCNAME[0]}: FAIL\" 1>&2; return 1"
@@ -41,7 +44,7 @@ function bash_function_init ()
 		EOF
 		echo "$( eval "${INIT_SRC}" 2>&1 )" | sed "1d;s/^/    /"
 		cat - 1>&2 <<-EOF
-		    : ${TAG%%/*} SOURCE; eval "\$( ${FNC} || echo return 1 )"
+		    : ${TAG%%/*} INIT; eval "\$( ${FNC} --init || echo return 1 )"
 
 		  If you want to be able to run the function as a script,
 		  or warn users that it is not to be run as a script,
@@ -63,16 +66,16 @@ function bash_function_init ()
 
 	return 0
 
-	### BASH_FUNCTION_INIT SOURCE ###
+	### BASH_FUNCTION_INIT INIT ###
 
 	#
-	for __bash_function_init_ent in __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
+	for __bash_function_init_ent in __bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}
 	do
 		eval "declare -p ${__bash_function_init_ent}" &>/dev/null \
 		|| {
 			printf "# Set the following in your function, before the call to BASH_FUNCTION_INIT..\n"
-			printf "declare %s=\n" "__bash_function_init_{opts,{locv,glbv}_{strings,arrays}}"
-			printf "%s=()\n" __bash_function_init_{opts,{locv,glbv}_{strings,arrays}}
+			printf "declare %s=\n" "__bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}"
+			printf "%s=()\n" __bash_function_init_{mods,opts,{locv,glbv}_{strings,arrays}}
 			printf "\n"
 			return 1
 		} 1>&2
@@ -83,6 +86,9 @@ function bash_function_init ()
 	__bash_function_init_tag="$( echo "${__bash_function_init_fnc}" | tr "[:lower:]" "[:upper:]" )"
 
 	#
+	__bash_function_init_mods=(
+		${__bash_function_init_mods:+"${__bash_function_init_mods[@]}"}
+	)
 	__bash_function_init_opts=(
 		bash_function_init
 		help
@@ -181,9 +187,15 @@ function bash_function_init ()
 	GLBV=( ${__bash_function_init_glbv_strings[*]:-} ${__bash_function_init_glbv_arrays[*]:-} )
 
 	#
+	for __bash_function_init_ent in ${__bash_function_init_mods[@]:+"${__bash_function_init_mods[@]}"}
+	do
+		echo "::: ${__bash_function_init_ent}" 1>&2
+	done
+
+	#
 	unset ${!__bash_function_init*}
 
-	### BASH_FUNCTION_INIT SOURCE ###
+	### BASH_FUNCTION_INIT INIT ###
 
 }
 
