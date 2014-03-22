@@ -157,7 +157,7 @@ function bash_function_init ()
 	__bash_function_init_rgx_skip=0
 	for __bash_function_init_ent in ${@:+"${@}"}
 	do
-		[[ "${__bash_function_init_rgx_skip}" == "0" && "${__bash_function_init_ent}" =~ (-h|-help|--|${__bash_function_init_rgx_opts})(=.+)* ]] \
+		[[ "${__bash_function_init_rgx_skip}" == "0" && "${__bash_function_init_ent}" =~ ^(-h|-help|--|${__bash_function_init_rgx_opts})(=.+)*$ ]] \
 		&& {
 			__bash_function_init_var="${BASH_REMATCH[1]}"
 			__bash_function_init_val="${BASH_REMATCH[2]}"
