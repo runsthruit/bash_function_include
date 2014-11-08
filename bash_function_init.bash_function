@@ -200,4 +200,4 @@ function bash_function_init ()
 
 }
 
-: BASH_FUNCTION_INIT RUN; I="${BASH_SOURCE[0]##*/}"; [ "${I}" != "${0}" -a "${#BASH_SOURCE[@]}" -ne 0 ] || ${I%.*} ${@:+"${@}"}
+#: BASH_FUNCTION_INIT RUN; I="${BASH_SOURCE[0]##*/}"; [ "${I}" != "${0}" -a "${#BASH_SOURCE[@]}" -ne 0 ] || ${I%.*} ${@:+"${@}"}
