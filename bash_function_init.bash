@@ -13,12 +13,12 @@ bash_function_init ()
 
     #=# BASH_FUNCTION_INIT #=# SETUP #=# YOUR CODE HERE #=#
 
-    # Your additions to opts_valid go here.
+    # Additions to opts_valid go here.
     opts_valid=(
         #my_opt     # Valid option for this function.
     )
 
-    # Your additions to string variables go here.
+    # Additions to string variables go here.
     # Local, Local-export, Global, Global-export
     vars_sl_=(
         #my_var     # Some variable for this funciton.
@@ -26,13 +26,13 @@ bash_function_init ()
     vars_slx=()
     vars_sg_=()
     vars_sgx=()
-    # Your additions to array variables go here.
+    # Additions to array variables go here.
     # Local, Local-export, Global, Global-export
     vars_al_=()
     vars_alx=()
     vars_ag_=()
     vars_agx=()
-    # Your additions to integer variables go here.
+    # Additions to integer variables go here.
     # Local, Local-export
     vars_il_=()
     vars_ilx=()
@@ -96,6 +96,9 @@ bash_function_init ()
     declare vars_il_=(
         fnc_return  # Return value for this function.
         I J K       # Common iterators.
+        flg_file0   # STDIN  is open?
+        flg_file1   # STDOUT is open?
+        flg_file2   # STDERR is open?
         ${vars_il_[*]}
     )
     declare vars_ilx=( ${vars_ilx[*]} )
@@ -266,10 +269,14 @@ bash_function_init ()
 
     # Set 'dbg' equal to 'opt_debug'
     dbg="${opt_debug:-0}"
+
+    # Flag standard file descriptors as open (or not).
+    [[ ! -t 0 ]] || flg_file0=1
+    [[ ! -t 1 ]] || flg_file1=1
+    [[ ! -t 2 ]] || flg_file2=1
     
     #=# BASH_FUNCTION_INIT #=# FUNCTION #=# YOUR CODE HERE #=#
 
-    # The content of your function goes here. :D
     bash_function_init_dump_vars
 
     #=# BASH_FUNCTION_INIT #=# EXIT #=# DO NOT TOUCH #=#
