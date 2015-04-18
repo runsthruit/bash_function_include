@@ -1,9 +1,9 @@
 #! /bin/bash
 
-bash_function_init ()
+function bash_function_init ()
 {
 
-    #=# BASH_FUNCTION_INIT #=# INIT #=# DO NOT TOUCH #=#
+    # BASH_FUNCTION_INIT # INIT # DO NOT TOUCH # {{{
 
     # Pickup the last command exit code.
     # Don't put *ANYTHING* before this in your function.
@@ -11,7 +11,9 @@ bash_function_init ()
     # Will add it to vars_il_ and vars____ later on, so it doesn't get erased.
     declare -ir pre_return=${?}
 
-    #=# BASH_FUNCTION_INIT #=# SETUP #=# YOUR CODE HERE #=#
+    # BASH_FUNCTION_INIT # INIT # DO NOT TOUCH # }}}
+
+    # BASH_FUNCTION_INIT # SETUP # YOUR CODE HERE # START
 
     # Additions to opts_valid go here.
     opts_valid=(
@@ -37,7 +39,9 @@ bash_function_init ()
     vars_il_=()
     vars_ilx=()
 
-    #=# BASH_FUNCTION_INIT #=# SETUP #=# DO NOT TOUCH #=#
+    # BASH_FUNCTION_INIT # SETUP # YOUR CODE HERE # FINISH
+
+    # BASH_FUNCTION_INIT # SETUP # DO NOT TOUCH # {{{
 
     # Special variable for setting valid options names.
     # This variable will be added to vars_al_ and vars____ later on.
@@ -166,7 +170,10 @@ bash_function_init ()
         tmp="${tmp//${tmps[${I}]}/${tmps[$((I+26))]}}"
     done
     # Set 'dbg' to environment debug level value.
-    printf -v tmp 'dbg="${%s:-${%s:-${DEBUG:-0}}}"' "${tmp}" "${tmp#DEBUG_}_DEBUG"
+    # Triple-'}' messes with vim folding, so crappy fix is to break this apart.
+    printf -v tmp 'dbg="${%s:-${%s:-}}"' "${tmp}" "${tmp#DEBUG_}_DEBUG"
+    eval "${tmp}"
+    printf -v tmp 'dbg="${dbg:-${DEBUG:-0}}"'
     eval "${tmp}"
     # Clear used variables.
     tmps=()
@@ -274,58 +281,68 @@ bash_function_init ()
     [[ ! -t 0 ]] || flg_file0=1
     [[ ! -t 1 ]] || flg_file1=1
     [[ ! -t 2 ]] || flg_file2=1
-    
-    #=# BASH_FUNCTION_INIT #=# FUNCTION #=# YOUR CODE HERE #=#
+
+    # BASH_FUNCTION_INIT # SETUP # DO NOT TOUCH # }}}
+
+    # BASH_FUNCTION_INIT # FUNCTION # YOUR CODE HERE # START
+
+    # bash_function_init_dump_vars {{{
+
+    function bash_function_init_dump_vars ()
+    {
+
+        declare \
+            ___bash_function_init_dump_vars___tmps \
+            ___bash_function_init_dump_vars___tmp
+
+        for ___bash_function_init_dump_vars___tmp in ${vars____[*]}
+        do
+            ___bash_function_init_dump_vars___tmps=(
+                ${___bash_function_init_dump_vars___tmp}
+                "$( declare -p "${___bash_function_init_dump_vars___tmp}" )"
+            )
+            [[ "${___bash_function_init_dump_vars___tmps[1]}" =~ ^declare${tc_spc}-([^[:blank:]]*) ]] || continue
+            if [[ "${BASH_REMATCH[1]}" == *a* ]]
+            then
+                printf \
+                        'declare -%s %s=(' "${BASH_REMATCH[1]}" \
+                        "${___bash_function_init_dump_vars___tmp}"
+                printf \
+                        -v ___bash_function_init_dump_vars___tmp \
+                        '___bash_function_init_dump_vars___tmps=( "${%s[@]}" )' \
+                        "${___bash_function_init_dump_vars___tmp}"
+                eval "${___bash_function_init_dump_vars___tmp}"
+                for ___bash_function_init_dump_vars___tmp in "${___bash_function_init_dump_vars___tmps[@]}"
+                do
+                    printf ' %q' "${___bash_function_init_dump_vars___tmp}"
+                done
+                [[ "${#___bash_function_init_dump_vars___tmps[@]}" -eq 0 ]] || printf ' '
+                printf ')\n'
+                continue
+            fi
+            printf 'declare -%s %s=' "${BASH_REMATCH[1]}" "${___bash_function_init_dump_vars___tmp}"
+            printf \
+                    -v ___bash_function_init_dump_vars___tmp \
+                    '___bash_function_init_dump_vars___tmp="${%s}"' \
+                    "${___bash_function_init_dump_vars___tmp}"
+            eval "${___bash_function_init_dump_vars___tmp}"
+            printf '%q\n' "${___bash_function_init_dump_vars___tmp}"
+        done
+
+    }
+
+    # }}}
 
     bash_function_init_dump_vars
 
-    #=# BASH_FUNCTION_INIT #=# EXIT #=# DO NOT TOUCH #=#
+    # BASH_FUNCTION_INIT # FUNCTION # YOUR CODE HERE # FINISH
+
+    # BASH_FUNCTION_INIT # EXIT # DO NOT TOUCH # {{{
 
     # Return the value of 'fnc_return' variable.
     return "${fnc_return}"
 
-}
-
-function bash_function_init_dump_vars ()
-{
-
-    declare \
-        ___bash_function_init_dump_vars___tmps \
-        ___bash_function_init_dump_vars___tmp
-
-    for ___bash_function_init_dump_vars___tmp in ${vars____[*]}
-    do
-        ___bash_function_init_dump_vars___tmps=(
-            ${___bash_function_init_dump_vars___tmp}
-            "$( declare -p "${___bash_function_init_dump_vars___tmp}" )"
-        )
-        [[ "${___bash_function_init_dump_vars___tmps[1]}" =~ ^declare${tc_spc}-([^[:blank:]]*) ]] || continue
-        if [[ "${BASH_REMATCH[1]}" == *a* ]]
-        then
-            printf \
-                    'declare -%s %s=(' "${BASH_REMATCH[1]}" \
-                    "${___bash_function_init_dump_vars___tmp}"
-            printf \
-                    -v ___bash_function_init_dump_vars___tmp \
-                    '___bash_function_init_dump_vars___tmps=( "${%s[@]}" )' \
-                    "${___bash_function_init_dump_vars___tmp}"
-            eval "${___bash_function_init_dump_vars___tmp}"
-            for ___bash_function_init_dump_vars___tmp in "${___bash_function_init_dump_vars___tmps[@]}"
-            do
-                printf ' %q' "${___bash_function_init_dump_vars___tmp}"
-            done
-            [[ "${#___bash_function_init_dump_vars___tmps[@]}" -eq 0 ]] || printf ' '
-            printf ')\n'
-            continue
-        fi
-        printf 'declare -%s %s=' "${BASH_REMATCH[1]}" "${___bash_function_init_dump_vars___tmp}"
-        printf \
-                -v ___bash_function_init_dump_vars___tmp \
-                '___bash_function_init_dump_vars___tmp="${%s}"' \
-                "${___bash_function_init_dump_vars___tmp}"
-        eval "${___bash_function_init_dump_vars___tmp}"
-        printf '%q\n' "${___bash_function_init_dump_vars___tmp}"
-    done
+    # BASH_FUNCTION_INIT # EXIT # DO NOT TOUCH # }}}
 
 }
 
