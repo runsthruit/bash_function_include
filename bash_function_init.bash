@@ -357,8 +357,6 @@ function bash_function_init ()
 
     # BASH_FUNCTION_INIT # MAIN # MY CODE HERE # START
 
-. ~/Source/github.com/ariver/bash_functions.git/declare_vars.bash
-
     exec 3>&1
 
     # Set error code variables.
@@ -532,9 +530,6 @@ function bash_function_init ()
         tmps=()
     } 1>&2
 
-#declare_vars ${vars____[*]}; echo .
-declare_vars_diff init
-
     # Iterate through source files and operate on appropriately.
     {
 
@@ -547,7 +542,7 @@ declare_vars_diff init
                     return "${err_nostdi}"
                 fi
             else
-                printf "\n${fnc}: Processing file { %s }\n" "${src_file}"
+                printf "${fnc}: Processing file { %s }\n" "${src_file}"
                 if [[ ! -e "${src_file}" ]]; then
                     printf "${fnc}: ERROR: %s\n" "File not found { ${src_file} }!"
                     return "${err_nofile}"
@@ -561,15 +556,12 @@ declare_vars_diff init
             tgt_file_src=
             tgt_file="${opt_output:-${src_file:--}}"
 
-[[ "${src_file_src}" =~ ${rgx_code_fnc} ]] || { printf '[[[%s]]]\n' "${?}"; continue; }
             while [[ "${src_file_src}" =~ ${rgx_code_fnc} ]]; do
                 src_file_src="${BASH_REMATCH[1]}"
                 src_file_fnc="${BASH_REMATCH[2]}"
                 src_file_fnc_nam="${BASH_REMATCH[6]:-${BASH_REMATCH[10]}}"
                 src_file_fnc_pad="${BASH_REMATCH[14]}"
                 tgt_file_src="${BASH_REMATCH[17]}${tgt_file_src}"
-#echo .; for (( K=0; K<$((${#BASH_REMATCH[@]})); K++ )); do printf '%s\t%q\n' "${K}" "${BASH_REMATCH[${K}]}"; done
-#declare_vars ${!src_file_*}
                 printf "${fnc}: %s\n" "Processing function { ${src_file_fnc_nam} }"
                 flg_code_fnd=0
                 for rgx_code_seg in "${rgx_code_segs[@]}"; do
@@ -579,7 +571,6 @@ declare_vars_diff init
                     rgx="${rgx_code_seg#*:}"
                     if [[ "${src_file_fnc}" =~ ${rgx} ]]; then
                         printf "${fnc}: %s\n" "Identified segment { ${tmp#seg_code_} }"
-#echo .; for (( K=0; K<$((${#BASH_REMATCH[@]})); K++ )); do printf '%s\t%q\n' "${K}" "${BASH_REMATCH[${K}]}"; done
                         flg_code_fnd=1
                         if [[ "${tmp}" == *_dnt ]]; then flg_code_upd=1; fi
                         if [[ "${BASH_REMATCH[7]}" == *${rgx_code_segs_bases[5]} ]]; then flg_code_ins=1; fi
@@ -591,13 +582,6 @@ declare_vars_diff init
                             fi
                             printf -v tmp 'tmp="${%s}"' "${tmp}"
                             eval "${tmp}"
-                            #tmps=(
-                            #"${BASH_REMATCH[1]}"
-                            #"${BASH_REMATCH[9]}"
-                            #)
-                            #if [[ "${tmp}" =~ ^([[:blank:]]*).*$ ]]; then
-                            #    tmps[2]="${BASH_REMATCH[1]}"
-                            #fi
                             printf -v src_file_fnc \
                                 '%s' \
                                 "${BASH_REMATCH[1]}" \
@@ -610,10 +594,6 @@ declare_vars_diff init
             done
             tgt_file_src="${src_file_src}${tgt_file_src}"
 
-#declare_vars tgt_file_src
-#declare_vars_diff | sed -n 's/^> //p'
-#declare_vars_diff init
-
             printf '%s\n' "${tgt_file_src}" > "${tmp_f}"
             flg_file_dif=0
             flg_file_skp="${opt_dryrun:-0}"
@@ -622,7 +602,6 @@ declare_vars_diff init
                 flg_file_dif=1
                 flg_file_upd=1
             else
-#echo "diff -EZBbw -W ${COLUMNS:-160} -y '${src_file}' '${tmp_f}' | '${PAGER:-less -isR}'"; return
                 command diff -EZBbw -q "${src_file}" "${tmp_f}" >/dev/null 2>&1
                 [[ "${?}" -eq 0 ]] || flg_file_dif=1
             fi
@@ -641,15 +620,14 @@ declare_vars_diff init
                         flg_file_skp=1
                     fi
                 fi
-#declare_vars tgt_file ${!flg_*}
-                if [[ "${flg_file_upd}" -gt 0 ]]; then
+                if [[ "${flg_file_skp}" -gt 0 ]]; then
+                    printf "${fnc}: %s\n" "Not updating source file, per request."
+                elif [[ "${flg_file_upd}" -gt 0 ]]; then
                     if [[ "${src_file}" == '-' ]]; then
                         cat "${tmp_f}" 1>&3
                     else
                         command cp -vf "${tmp_f}" "${tgt_file}"
                     fi
-                elif [[ "${flg_file_skp}" -gt 0 ]]; then
-                    printf "${fnc}: %s\n" "Not updating source file, per request."
                 else
                     printf "${fnc}: %s\n" "Not updating source file."
                 fi
