@@ -221,8 +221,10 @@ function bash_function_init ()
     vars_al_=( opts_valid ${vars_al_[*]} )
     vars____=( opts_valid ${vars____[*]} )
     # Add pre_return to variable collections.
-    vars_il_=( pre_return ${vars_il_[*]} )
-    vars____=( pre_return ${vars____[*]} )
+    if [[ -n "${pre_return}" ]]; then
+        vars_il_=( pre_return ${vars_il_[*]} )
+        vars____=( pre_return ${vars____[*]} )
+    fi
 
     # Set function name variable.
     fnc="${FUNCNAME[0]}"
