@@ -1,9 +1,9 @@
 #! /bin/bash
 
-function bash_function_init ()
+function bash_function_include ()
 {
 
-    # BASH_FUNCTION_INIT # INIT # YOUR CODE HERE # START
+    #bash_function_include#$init {{{
 
     # Pickup the last command exit code.
     # Don't put *ANYTHING* before this in your function.
@@ -13,13 +13,13 @@ function bash_function_init ()
 
     # Additions to opts_valid go here.
     opts_valid=(
-    #my_opt     # Valid option for this function.
+        #my_opt     # Valid option for this function.
     )
 
     # Additions to string variables go here.
     # Local, Local-export, Global, Global-export
     vars_sl_=(
-    #my_var     # Some variable for this funciton.
+        #my_var     # Some variable for this funciton.
     )
     vars_slx=()
     vars_sg_=()
@@ -33,79 +33,65 @@ function bash_function_init ()
     vars_il_=()
     vars_ig_=()
 
-    # BASH_FUNCTION_INIT # INIT # YOUR CODE HERE # FINISH
+    #bash_function_include#$init }}}
 
-    # BASH_FUNCTION_INIT # INIT # MY CODE HERE # START
+    #bash_function_include#$$init {{{
 
     # Additions to opts_valid go here.
     opts_valid=(
-    #my_opt     # Valid option for this function.
-    install     # Remove any extant init code, and install like new.
-    output      # Output to provided path instead of source file.
-    dryrun      # Show what would be done, with no prompts for further info.
-    force       # Use defaults, even if to point of error, avoiding prompts.
+        include     # Include other function sources to use.
+        new         # Output a new/blank function.
+        output      # Output to provided path instead of source file.
+        force       # Use defaults, even if to point of error, avoiding prompts.
+        dryrun      # Show what would be done, with no prompts for further info.
     )
 
     # Additions to string variables go here.
     # Local, Local-export, Global, Global-export
     vars_sl_=(
-    #my_var                 # Some variable for this funciton.
-    src_init                # Path of init source file.
-    src_init_src            # Source of init source file.
-    src_file                # Source file with function[s] to install/update into.
-    src_file_src            # Source code with function[s] to install/update into.
-    src_file_fnc            # Function code, for processing.
-    src_file_fnc_nam        # Function name.
-    src_file_fnc_pad        # Function padding.
-    tgt_file                # Target file with function[s] installed/updated.
-    tgt_file_src            # Target code with function[s] installed/updated.
-    src_fnc                 # Function and its line-num to process in source file.
-    tmp_d                   # Directory to use for temporary files.
-    tmp_f                   # File to use for intermediate states of source.
-    seg_code_init_ych       # Personal setup code template.
-    seg_code_setup_dnt      # Setup code segment.
-    seg_code_main_ych       # Personal function code template.
-    seg_code_exit_dnt       # Exit code segment.
-    seg_code_exec_dnt       # Exec code segment.
-    rgx_code_fnc            # Regex to find a function.
-    rgx_code_seg            # Iterator of regexs to find code segments.
+        bfi_file                # Path of file with function[s] for inclusion.
+        bfi_code                # Source of include file.
+        src_file                # Source file with function[s] for action.
+        src_code                # Source code with function[s] for action.
+        src_code_fnc            # Function code, for processing.
+        src_code_fnc_nam        # Function name.
+        src_code_fnc_pad        # Function padding.
+        tgt_file                # Target file with function[s] actioned.
+        tgt_code                # Target code with function[s] actioned.
+        tmp_d                   # Directory to use for temporary files.
+        tmp_f                   # File to use for intermediate states of source.
+        seg_rgx                 # Segment name/regex tuple.
+        seg_code                # Segment name/code tuple.
+        rgx_code_fnc            # Regex to find a function.
+        rgx_file_bfi            # Regex to find BFI path.
     )
-    vars_slx=()
-    vars_sg_=()
-    vars_sgx=()
+
     # Additions to array variables go here.
     # Local and Global (Arrays may not be exported)
     vars_al_=(
-    src_files               # Source files with function[s] to install/update into.
-    src_file_fnc_nams       # Function[s] processed in source file.
-    rgx_code_segs           # Regexs to find code segments.
-    rgx_code_segs_bases     # Bases strings to use in constructing regexs.
+        bfi_files               # Files with function[s] for inclusion.
+        src_files               # Source files with function[s] for action.
+        seg_rgxs                # Regexs to find code segments.
+        seg_codes               # Codes of segments.
     )
-    vars_ag_=()
+
     # Additions to integer variables go here.
     # Local and Global (Integers are not exported with integer type intact)
     vars_il_=(
-    src_init_line   # Line number bash_function_init was found on.
-    flg_code_fnd    # Flag noting segment code was found in function 
-    flg_code_ins    # Flag noting segment code is to be inserted 
-    flg_code_upd    # Flag noting segment code is to be updated.
-    flg_file_dif    # Flag noting source has been modified.
-    flg_file_upd    # Flag noting source file is to be updated.
-    err_noinit      # Error: Init source file not found/readable.
-    err_conout      # Error: Output file provided, but multiple sources provided.
-    err_badout      # Error: Output file provided, but unable to write.
-    err_badtmp      # Error: Temporary dir/file uanble to be written.
-    err_badseg      # Error: Could not load code segment.
-    err_nostdi      # Error: No input provided on STDIN.
-    err_nofile      # Error: Input file not found.
-    err_nrfile      # Error: Input file cannot be read.
-    err_nmstdi      # Error: No STDIN input when using multiple files.
+        err_badopt      # Error: Bad option to BFI.
+        err_wofbfi      # Error: BFI source file not found/readable.
+        err_conout      # Error: Output file provided, but multiple sources provided.
+        err_wofout      # Error: Output file provided, but unable to write.
+        err_woftmp      # Error: Temporary dir/file uanble to be written.
+        err_badseg      # Error: Could not load code segment.
+        err_wostdi      # Error: No input provided on STDIN.
+        err_wofsrc      # Error: Source file not found/readable.
+        err_nmstdi      # Error: No STDIN input when using multiple files.
     )
-    vars_ig_=()
 
-    # BASH_FUNCTION_INIT # INIT # MY CODE HERE # FINISH
+    #bash_function_include#$$init }}}
 
-    # BASH_FUNCTION_INIT # SETUP # DO NOT TOUCH # {{{
+    #bash_function_include#$load {{{
 
     # Special variable for setting valid options names.
     # This variable will be added to vars_al_ and vars____ later on.
@@ -167,9 +153,9 @@ function bash_function_init ()
     local vars_il_=(
     fnc_return  # Return value for this function.
     I J K       # Common iterators.
-    flg_file0   # STDIN  is open?
-    flg_file1   # STDOUT is open?
-    flg_file2   # STDERR is open?
+    flg_stdi    # STDIN  is open?
+    flg_stdo    # STDOUT is open?
+    flg_stde    # STDERR is open?
     ${vars_il_[*]}
     )
     local vars_ilx=( ${vars_ilx[*]} )
@@ -190,7 +176,7 @@ function bash_function_init ()
     ${vars___x[*]}
     )
     # Add options from opts_valid to variable collections.
-    vars_sl_=( ${opts_valid[*]/#/opt_} ${vars_sl_[*]} )
+    vars_al_=( ${opts_valid[*]/#/opt_} ${vars_al_[*]} )
     vars____=( ${opts_valid[*]/#/opt_} ${vars____[*]} )
 
     # Create array variables.
@@ -290,15 +276,18 @@ function bash_function_init ()
             tmp="${tmp#--}"
             # If valid option name..
             if [[ " ${opts_valid[*]} " =~ ${tc_spc}${tmp%%=*}${tc_spc} ]]; then
-                # Assign '1' to simple options.
+                # Assign '1' to boolean options.
                 [[ "${tmp}" == *=* ]] || tmp="${tmp}=1"
                 # Set 'opt_*' variable based on provided option.
-                printf -v tmp -- 'opt_%s=%q' "${tmp%%=*}" "${tmp#*=}"
+                printf -v tmp 'opt_%s=( %q "${opt_%s[@]}" )' \
+                    "${tmp%%=*}" \
+                    "${tmp#*=}" \
+                    "${tmp%%=*}"
                 eval "${tmp}"
             else
                 # Add to arguments array, can be excluded in comp to opts_invalid.
                 args[${#args[@]}]="${tmp}"
-                # If not valid option name, add to invalid list.
+                # Add to invalid list.
                 tmp="${tmp%%=*}"
                 opts_invalid[${#opts_invalid[@]}]="${tmp}"
             fi
@@ -351,25 +340,25 @@ function bash_function_init ()
     dbg="${dbg:-${opt_debug:-0}}"
 
     # Flag standard file descriptors as open (or not).
-    [[ ! -t 0 ]] || flg_file0=1
-    [[ ! -t 1 ]] || flg_file1=1
-    [[ ! -t 2 ]] || flg_file2=1
+    [[ ! -t 0 ]] || flg_stdi=1
+    [[ ! -t 1 ]] || flg_stdo=1
+    [[ ! -t 2 ]] || flg_stde=1
 
-    # BASH_FUNCTION_INIT # SETUP # DO NOT TOUCH # }}}
+    #bash_function_include#$load }}}
 
-    # BASH_FUNCTION_INIT # MAIN # MY CODE HERE # START
+    #bash_function_include#$$main
 
-    exec 3>&1
+    . ~/Source/github.com/ariver/bash_functions.git/declare_vars.bash
 
     # Set error code variables.
-    err_noinit=11
+    err_badopt=10
+    err_wofbfi=11
     err_conout=12
-    err_badout=13
-    err_badtmp=14
+    err_wofout=13
+    err_woftmp=14
     err_badseg=15
-    err_nostdi=16
-    err_nofile=17
-    err_nrfile=18
+    err_wostdi=16
+    err_wofsrc=17
     err_nmstdi=19
 
     # Regex patterns for parsing source.
@@ -397,39 +386,40 @@ function bash_function_init ()
             '('"${tc_nln}"'[[:blank:]]*})' \
         ')' \
         '('"${tc_nln}"'.*)*$'
-    rgx_code_segs_bases=(
-    '# BASH_FUNCTION_INIT #'
-    '# DO NOT TOUCH'
-    '# YOUR CODE HERE'
-    '# ({{''{|START)'
-    '# (}}''}|FINISH)'
-    '# INSERT'
-    'INIT:init:ych'
-    'SETUP:setup:dnt'
-    'MAIN:main:ych'
-    'EXEC:exec:dnt'
-    )
+
+    # Regex pattern to find BFI path.
+    printf -v rgx_file_bfi \
+        '%s' \
+        '^' \
+        "([^${tc_spc}]+)" \
+        "[${tc_spc}]+" \
+        "([^${tc_spc}]+)" \
+        "[${tc_spc}]+" \
+        '(.*)' \
+        '$'
 
     # Initial processing of source files provided.
     {
         src_files=( "${args[@]}" )
         if [[ "${#src_files[@]}" -eq 0 ]]; then
-            if [[ "${flg_file0}" -eq 0 ]]; then
+            if [[ "${flg_stdi}" -eq 0 ]]; then
                 src_files=( '-' )
-            else
-                opt_help=1
+            elif [[ "${opt_help:-0}" -eq 0 ]]; then
+                printf "${fnc}: ERROR: %s\n" \
+                    "No source files to process, including STDIN."
+                fnc_return="${err_wostdi}"
             fi
         elif [[ "${#src_files[@]}" -gt 1 ]]; then
             if [[ -n "${opt_output}" ]]; then
                 printf "${fnc}: ERROR: %s\n" \
                     "Cannot specify output when providing multiple source files."
-                return "${err_conout}"
+                fnc_return="${err_conout}"
             fi
             for src_file in "${src_files[@]}"; do
                 if [[ "${src_file}" == "-" ]]; then
                     printf "${fnc}: ERROR: %s\n" \
                         "Cannot accept STDIN input when providing multiple source files."
-                    return "${err_nmstdi}"
+                    fnc_return="${err_nmstdi}"
                 fi
             done
         fi
@@ -437,16 +427,15 @@ function bash_function_init ()
 
     # Display help and possibly invalid options provided.
     {
-        if [[ "${opt_help}" -ne 0 || "${#opts_invalid[@]}" -ne 0 ]]; then
-
+        if [[ "${opt_help}" -ne 0 || "${#opts_invalid[@]}" -ne 0 || "${fnc_return}" -ne 0 ]]; then
             if [[ "${#opts_invalid[@]}" -ne 0 ]]; then
-
-                echo INVALID
-
+                for ent in "${opts_invalid[@]}"; do
+                    printf "${fnc}: ERROR: %s\n" \
+                        "Invalid option { ${ent} }."
+                done
             fi
-
             echo HELP
-
+            return "${fnc_return}"
         fi
     } 1>&2
 
@@ -455,35 +444,43 @@ function bash_function_init ()
         tmp_d="${TMPDIR:-/tmp}/${rgx_sess}"
         tmp_f="${tmp_d}/tmp_file"
         if [[ ! -d "${tmp_d}/." || ! -r "${tmp_d}/." || ! -x "${tmp_d}/." ]]; then
-            mkdir -p "${tmp_d}"
+            command mkdir -p "${tmp_d}"
         fi
         if [[ ! -d "${tmp_d}/." || ! -r "${tmp_d}/." || ! -x "${tmp_d}/." ]]; then
-            printf "${fnc}: ERROR: %s\n" "Could not create/read temporary directory. { ${tmp_d} }"
+            printf "${fnc}: ERROR: %s\n" \
+                "Could not create/read temporary directory. { ${tmp_d} }"
             return "${err_badtmp}"
         fi
         touch "${tmp_f}"
         if [[ ! -e "${tmp_f}" ]]; then
-            printf "${fnc}: ERROR: %s\n" "Could not create temporary file. { ${tmp_f} }"
+            printf "${fnc}: ERROR: %s\n" \
+                "Could not create temporary file. { ${tmp_f} }"
             return "${err_badtmp}"
         fi
         command rm -f "${tmp_f}"
     } 1>&2
 
-    # Locate init source.
+    # Locate BFI source.
     {
-        src_init="$( shopt -s extdebug; declare -F "${fnc}"; shopt -u extdebug )"
-        if [[ "${src_init}" =~ ^([^${tc_spc}]+)[${tc_spc}]+([^${tc_spc}]+)[${tc_spc}]+(.*)$ ]]; then
-            src_init_line="${BASH_REMATCH[2]}"
-            src_init="${BASH_REMATCH[3]}"
-            if [[ ! -r "${src_init}" ]]; then
-                printf "${fnc}: ERROR: %s\n" "Could not read source. { ${src_init} }"
-                return "${err_noinit}"
+        bfi_file="$(
+            shopt -s extdebug;
+            declare -F "${fnc}";
+            shopt -u extdebug
+        )"
+        if [[ "${bfi_file}" =~ ${rgx_file_bfi} ]]; then
+            bfi_file="${BASH_REMATCH[3]}"
+            if [[ ! -r "${bfi_file}" ]]; then
+                printf "${fnc}: ERROR: %s\n" \
+                    "Could not read source. { ${bfi_file} }"
+                return "${err_wofbfi}"
             fi
         else
-            printf "${fnc}: ERROR: %s\n" "Could not determine source. { ${src_init} }"
-            return "${err_noinit}"
+            printf "${fnc}: ERROR: %s\n" \
+                "Could not determine source. { ${bfi_file} }"
+            return "${err_wofbfi}"
         fi
     } 1>&2
+declare_vars ${vars____[*]}; return
 
     # Load init source into code segment variables.
     {
@@ -539,19 +536,19 @@ function bash_function_init ()
 
             if [[ "${src_file}" == "-" ]]; then
                 printf "\n${fnc}: %s\n" "Processing STDIN"
-                if [[ "${flg_file0}" -eq 1 ]]; then
+                if [[ "${flg_stdi}" -eq 1 ]]; then
                     printf "${fnc}: ERROR: %s\n" "STDIN input not found!"
-                    return "${err_nostdi}"
+                    flg_return="${err_nostdi}"
                 fi
             else
                 printf "${fnc}: Processing file { %s }\n" "${src_file}"
                 if [[ ! -e "${src_file}" ]]; then
                     printf "${fnc}: ERROR: %s\n" "File not found { ${src_file} }!"
-                    return "${err_nofile}"
+                    flg_return="${err_nofile}"
                 fi
                 if [[ ! -r "${src_file}" ]]; then
                     printf "${fnc}: ERROR: %s\n" "Cannot read file { ${src_file} }!"
-                    return "${err_nrfile}"
+                    flg_return="${err_nrfile}"
                 fi
             fi
             src_file_src="$( cat "${src_file}" )"
@@ -610,7 +607,7 @@ function bash_function_init ()
             if [[ "${flg_file_dif}" -eq 0 ]]; then
                 printf "${fnc}: %s\n" "No changes to source file."
             else
-                if [[ "${flg_file0}" -eq 1 && "${flg_file_upd}" -eq 0 ]]; then
+                if [[ "${flg_stdi}" -eq 1 && "${flg_file_upd}" -eq 0 ]]; then
                     read -p "${fnc}: Source updated, view diff [y/N]? " tmp
                     if [[ "${tmp}" == [Yy]* ]]; then
                         diff -EZBbw -W ${COLUMNS:-160} -y "${src_file}" "${tmp_f}" | "${PAGER:-less -isR}"
@@ -649,66 +646,18 @@ function bash_function_init ()
     # Return the value of 'fnc_return' variable.
     return "${fnc_return}"
 
-    # BASH_FUNCTION_INIT # MAIN # MY CODE HERE # FINISH
+    #bash_function_include#$$main
 
-    # BASH_FUNCTION_INIT # MAIN # YOUR CODE HERE # START
-
-    # function bash_function_init_dump_vars {{{
-
-    function bash_function_init_dump_vars ()
-    {
-
-        local \
-            ___bash_function_init_dump_vars___tmps \
-            ___bash_function_init_dump_vars___tmp
-
-        for ___bash_function_init_dump_vars___tmp in ${vars____[*]}
-        do
-            ___bash_function_init_dump_vars___tmps=(
-            ${___bash_function_init_dump_vars___tmp}
-            "$( declare -p "${___bash_function_init_dump_vars___tmp}" )"
-            )
-            [[ "${___bash_function_init_dump_vars___tmps[1]}" =~ ^declare${tc_spc}-([^[:blank:]]*) ]] || continue
-            if [[ "${BASH_REMATCH[1]}" == *a* ]]; then
-                printf \
-                    'declare -%s %s=(' "${BASH_REMATCH[1]}" \
-                    "${___bash_function_init_dump_vars___tmp}"
-                printf \
-                    -v ___bash_function_init_dump_vars___tmp \
-                    '___bash_function_init_dump_vars___tmps=( "${%s[@]}" )' \
-                    "${___bash_function_init_dump_vars___tmp}"
-                eval "${___bash_function_init_dump_vars___tmp}"
-                for ___bash_function_init_dump_vars___tmp in "${___bash_function_init_dump_vars___tmps[@]}"
-                do
-                    printf ' %q' "${___bash_function_init_dump_vars___tmp}"
-                done
-                [[ "${#___bash_function_init_dump_vars___tmps[@]}" -eq 0 ]] || printf ' '
-                printf ')\n'
-                continue
-            fi
-            printf 'declare -%s %s=' "${BASH_REMATCH[1]}" "${___bash_function_init_dump_vars___tmp}"
-            printf \
-                -v ___bash_function_init_dump_vars___tmp \
-                '___bash_function_init_dump_vars___tmp="${%s}"' \
-                "${___bash_function_init_dump_vars___tmp}"
-            eval "${___bash_function_init_dump_vars___tmp}"
-            printf '%q\n' "${___bash_function_init_dump_vars___tmp}"
-        done
-
-    }
-
-    # function bash_function_init_dump_vars }}}
-
-    bash_function_init_dump_vars
+    #bash_function_include#$main {{{
 
     # Return the value of 'fnc_return' variable.
     return "${fnc_return}"
 
-    # BASH_FUNCTION_INIT # MAIN # YOUR CODE HERE # FINISH
+    #bash_function_include#$main }}}
 
 }
 
-# BASH_FUNCTION_INIT # EXEC # DO NOT TOUCH # {{{
+#bash_function_include#$exit {{{
 unset ___tmp
 ___tmp=( "${BASH_SOURCE[@]}" )
 [[ "${___tmp}" != "${0}" && "${#___tmp[@]}" -ne 0 ]] || {
@@ -717,4 +666,4 @@ exit "${?}"
 }
 unset ___tmp
 return 0
-# BASH_FUNCTION_INIT # EXEC # DO NOT TOUCH # }}}
+#bash_function_include#$exit }}}
