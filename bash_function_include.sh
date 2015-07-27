@@ -469,19 +469,26 @@ function bash_function_include ()
         )"
         if [[ "${bfi_file}" =~ ${rgx_file_bfi} ]]; then
             bfi_file="${BASH_REMATCH[3]}"
-            if [[ ! -r "${bfi_file}" ]]; then
-                printf "${fnc}: ERROR: %s\n" \
-                    "Could not read source. { ${bfi_file} }"
-                return "${err_wofbfi}"
-            fi
         else
             printf "${fnc}: ERROR: %s\n" \
                 "Could not determine source. { ${bfi_file} }"
             return "${err_wofbfi}"
         fi
     } 1>&2
-declare_vars ${vars____[*]}; return
 
+    # Initial processing of include files.
+    {
+        bfi_files=( "${opt_include[@]}" "${bfi_file}" )
+        for bfi_file in "${bfi_files[@]}"; do
+            if [[ ! -r "${bfi_file}" ]]; then
+                printf "${fnc}: ERROR: %s\n" \
+                    "Could not read include. { ${bfi_file} }"
+                return "${err_wofbfi}"
+            fi
+        done
+    } 1>&2
+
+declare_vars ${vars____[*]}; return
     # Load init source into code segment variables.
     {
         for (( I=6; I<${#rgx_code_segs_bases[@]}; I++ ))
