@@ -1,4 +1,4 @@
-bash_function_init
-==================
+bash_function_include
+=====================
 
-Functions/script for initializing new shell functions.
+Function/script for initializing/including in shell functions.
