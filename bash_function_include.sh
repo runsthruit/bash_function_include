@@ -348,8 +348,6 @@ function bash_function_include ()
 
     #bash_function_include#$$main
 
-    . ~/Source/github.com/ariver/bash_functions.git/declare_vars.bash
-
     # Set error code variables.
     err_badopt=10
     err_wofbfi=11
@@ -398,32 +396,13 @@ function bash_function_include ()
         '(.*)' \
         '$'
 
-    # Initial processing of source files provided.
-    {
-        src_files=( "${args[@]}" )
-        if [[ "${#src_files[@]}" -eq 0 ]]; then
-            if [[ "${flg_stdi}" -eq 0 ]]; then
-                src_files=( '-' )
-            elif [[ "${opt_help:-0}" -eq 0 ]]; then
-                printf "${fnc}: ERROR: %s\n" \
-                    "No source files to process, including STDIN."
-                fnc_return="${err_wostdi}"
-            fi
-        elif [[ "${#src_files[@]}" -gt 1 ]]; then
-            if [[ -n "${opt_output}" ]]; then
-                printf "${fnc}: ERROR: %s\n" \
-                    "Cannot specify output when providing multiple source files."
-                fnc_return="${err_conout}"
-            fi
-            for src_file in "${src_files[@]}"; do
-                if [[ "${src_file}" == "-" ]]; then
-                    printf "${fnc}: ERROR: %s\n" \
-                        "Cannot accept STDIN input when providing multiple source files."
-                    fnc_return="${err_nmstdi}"
-                fi
-            done
-        fi
-    } 1>&2
+{
+. ~/Source/github.com/ariver/bash_functions.git/declare_vars.bash
+echo .
+declare_vars_diff init
+declare_vars ${vars____[*]}
+echo .
+} 1>&2
 
     # Display help and possibly invalid options provided.
     {
@@ -437,6 +416,68 @@ function bash_function_include ()
             echo HELP
             return "${fnc_return}"
         fi
+    } 1>&2
+
+    # Initial processing of source files provided.
+    {
+        src_files=( "${args[@]}" )
+        if [[ "${#src_files[@]}" -eq 0 ]]; then
+            if [[ "${flg_stdi}" -eq 0 ]]; then
+                src_files=( '-' )
+            else
+                printf "${fnc}: ERROR: %s\n" \
+                    "No source files to process, including STDIN."
+                return "${err_wostdi}"
+            fi
+        else
+            for src_file in "${src_files[@]}"; do
+                if [[ "${#src_files[@]}" -gt 1 ]]; then
+                    if [[ -n "${opt_output}" ]]; then
+                        printf "${fnc}: ERROR: %s\n" \
+                            "Cannot specify output when providing multiple source files."
+                        return "${err_conout}"
+                    fi
+                    if [[ "${src_file}" == "-" ]]; then
+                        printf "${fnc}: ERROR: %s\n" \
+                            "Cannot accept STDIN input when providing multiple source files."
+                        return "${err_nmstdi}"
+                    fi
+                    if [[ ! -r "${src_file}" ]]; then
+                        printf "${fnc}: ERROR: %s\n" \
+                            "Could not read source. { ${src_file} }"
+                        return "${err_wofsrc}"
+                    fi
+                fi
+            done
+        fi
+    } 1>&2
+
+    # Locate BFI source.
+    {
+        bfi_file="$(
+            shopt -s extdebug;
+            declare -F "${fnc}";
+            shopt -u extdebug
+        )"
+        if [[ "${bfi_file}" =~ ${rgx_file_bfi} ]]; then
+            bfi_file="${BASH_REMATCH[3]}"
+        else
+            printf "${fnc}: ERROR: %s\n" \
+                "Could not determine source. { ${bfi_file} }"
+            return "${err_wofbfi}"
+        fi
+    } 1>&2
+
+    # Initial processing of include files.
+    {
+        bfi_files=( "${bfi_file}" "${opt_include[@]}" )
+        for bfi_file in "${bfi_files[@]}"; do
+            if [[ ! -r "${bfi_file}" ]]; then
+                printf "${fnc}: ERROR: %s\n" \
+                    "Could not read include. { ${bfi_file} }"
+                return "${err_wofbfi}"
+            fi
+        done
     } 1>&2
 
     # Setup and test temporary directory.
@@ -460,35 +501,8 @@ function bash_function_include ()
         command rm -f "${tmp_f}"
     } 1>&2
 
-    # Locate BFI source.
-    {
-        bfi_file="$(
-            shopt -s extdebug;
-            declare -F "${fnc}";
-            shopt -u extdebug
-        )"
-        if [[ "${bfi_file}" =~ ${rgx_file_bfi} ]]; then
-            bfi_file="${BASH_REMATCH[3]}"
-        else
-            printf "${fnc}: ERROR: %s\n" \
-                "Could not determine source. { ${bfi_file} }"
-            return "${err_wofbfi}"
-        fi
-    } 1>&2
+{ echo .; declare_vars_diff; return; } 1>&2
 
-    # Initial processing of include files.
-    {
-        bfi_files=( "${opt_include[@]}" "${bfi_file}" )
-        for bfi_file in "${bfi_files[@]}"; do
-            if [[ ! -r "${bfi_file}" ]]; then
-                printf "${fnc}: ERROR: %s\n" \
-                    "Could not read include. { ${bfi_file} }"
-                return "${err_wofbfi}"
-            fi
-        done
-    } 1>&2
-
-declare_vars ${vars____[*]}; return
     # Load init source into code segment variables.
     {
         for (( I=6; I<${#rgx_code_segs_bases[@]}; I++ ))
