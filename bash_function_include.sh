@@ -398,10 +398,8 @@ function bash_function_include ()
 
 {
 . ~/Source/github.com/ariver/bash_functions.git/declare_vars.bash
-echo .
 declare_vars_diff init
-declare_vars ${vars____[*]}
-echo .
+#declare_vars ${vars____[*]}; echo .
 } 1>&2
 
     # Display help and possibly invalid options provided.
@@ -459,6 +457,10 @@ echo .
             declare -F "${fnc}";
             shopt -u extdebug
         )"
+        if [[ "${dbg}" -ge 3 ]]; then
+            printf "${fnc}: %s\n" \
+                "Pre-parse BFI file data. { ${bfi_file} }"
+        fi
         if [[ "${bfi_file}" =~ ${rgx_file_bfi} ]]; then
             bfi_file="${BASH_REMATCH[3]}"
         else
@@ -470,8 +472,29 @@ echo .
 
     # Initial processing of include files.
     {
-        bfi_files=( "${bfi_file}" "${opt_include[@]}" )
+        bfi_files=( "${bfi_file}" )
+        for (( I=$((${#opt_include[@]}-1)); I>=0; I-- )); do
+            bfi_file="${opt_include[${I}]}"
+            if [[ "${dbg}" -ge 3 ]]; then
+                printf "${fnc}: %s\n" \
+                    "Raw include argument { ${bfi_file} }"
+            fi
+            while [[ "${bfi_file}" =~ ^(.*[^${tc_bslash}]):(.*)$ ]]; do
+                bfi_files[${#bfi_files[@]}]="${BASH_REMATCH[2]}"
+                bfi_file="${BASH_REMATCH[1]}"
+                if [[ "${dbg}" -ge 3 ]]; then
+                    printf "${fnc}: %s\n" \
+                        "Include argument match 1 { ${BASH_REMATCH[1]} }" \
+                        "Include argument match 2 { ${BASH_REMATCH[2]} }"
+                fi
+            done
+            bfi_files[${#bfi_files[@]}]="${bfi_file}"
+        done
         for bfi_file in "${bfi_files[@]}"; do
+            if [[ "${dbg}" -ge 2 ]]; then
+                printf "${fnc}: %s\n" \
+                    "Include { ${bfi_file} }"
+            fi
             if [[ ! -r "${bfi_file}" ]]; then
                 printf "${fnc}: ERROR: %s\n" \
                     "Could not read include. { ${bfi_file} }"
@@ -480,6 +503,7 @@ echo .
         done
     } 1>&2
 
+#:#
     # Setup and test temporary directory.
     {
         tmp_d="${TMPDIR:-/tmp}/${rgx_sess}"
@@ -491,6 +515,10 @@ echo .
             printf "${fnc}: ERROR: %s\n" \
                 "Could not create/read temporary directory. { ${tmp_d} }"
             return "${err_badtmp}"
+        fi
+        if [[ "${dbg}" -ge 3 ]]; then
+            printf "${fnc}: %s\n" \
+                "Temp Dir { ${tmp_d} }"
         fi
         touch "${tmp_f}"
         if [[ ! -e "${tmp_f}" ]]; then
